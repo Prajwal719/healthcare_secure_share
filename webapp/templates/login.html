@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width:440px; margin:3rem auto;">
+  <div class="card">
+    <h2>🔐 Secure Login</h2>
+
+    <form method="POST">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Your username" required autofocus/>
+      </div>
+
+      <div class="form-group">
+        <label>Login Password</label>
+        <input type="password" name="password" placeholder="Your login password" required/>
+      </div>
+
+      <div class="form-group">
+        <label>🔑 Key Password</label>
+        <input type="password" name="key_password"
+               placeholder="Your RSA key password (set during registration)"/>
+        <small style="color:#718096; font-size:0.8rem;">
+          Required for upload, download, and share. Leave blank if you only need to view the file list.
+        </small>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">
+        🔑 Login
+      </button>
+    </form>
+
+    <p style="margin-top:1rem; text-align:center; font-size:0.88rem; color:#718096;">
+      No account? <a href="{{ url_for('register') }}" style="color:#3182ce;">Register here</a>
+    </p>
+  </div>
+
+  <div class="card" style="background:#f7fafc;">
+    <h2 style="font-size:1rem;">👤 Demo Accounts</h2>
+    <table>
+      <tr><th>Username</th><th>Login Password</th><th>Key Password</th><th>Role</th></tr>
+      <tr>
+        <td>doctor</td><td>DoctorPass1!</td><td>DoctorPass1!</td>
+        <td><span class="role-badge role-doctor">doctor</span></td>
+      </tr>
+      <tr>
+        <td>nurse</td><td>NursePass1!</td><td>NursePass1!</td>
+        <td><span class="role-badge role-nurse">nurse</span></td>
+      </tr>
+      <tr>
+        <td>patient</td><td>PatientPass1!</td><td>PatientPass1!</td>
+        <td><span class="role-badge role-patient">patient</span></td>
+      </tr>
+      <tr>
+        <td>admin</td><td>AdminPass1!</td><td>AdminPass1!</td>
+        <td><span class="role-badge role-admin">admin</span></td>
+      </tr>
+    </table>
+    <small style="color:#718096; font-size:0.78rem; display:block; margin-top:0.5rem;">
+      For demo accounts, login password = key password for simplicity.
+    </small>
+  </div>
+</div>
+
+{% endblock %}

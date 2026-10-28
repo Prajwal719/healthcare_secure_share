@@ -1,0 +1,20 @@
+# ============================================================
+# Secure Healthcare File-Sharing Protocol
+# Python 3.10+ required
+# ============================================================
+
+# Core cryptography — AES-GCM, RSA-OAEP, RSA-PSS, scrypt, TLS cert generation
+cryptography>=42.0.0
+
+# TOTP two-factor authentication (optional feature)
+pyotp>=2.9.0
+
+# Testing framework
+pytest>=8.0.0
+pytest-timeout>=2.3.0
+
+# Pretty terminal output for attack simulator and CLI
+rich>=13.7.0
+
+# Web frontend
+flask>=3.0.0

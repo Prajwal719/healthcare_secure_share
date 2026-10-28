@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h2>
+    📋 Audit Log
+    <a href="{{ url_for('verify_log') }}" class="btn btn-info btn-sm" style="margin-left:auto;">
+      🔗 Verify Chain Integrity
+    </a>
+  </h2>
+
+  {% if events %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Timestamp</th>
+        <th>Actor</th>
+        <th>Action</th>
+        <th>Details</th>
+        <th>IP</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in events %}
+      <tr>
+        <td style="color:#a0aec0; font-size:0.8rem;">{{ e.entry_id }}</td>
+        <td style="font-size:0.85rem;">{{ e.timestamp_fmt }}</td>
+        <td style="font-family:monospace; font-size:0.8rem;">{{ e.actor_id[:18] }}…</td>
+        <td>
+          <span class="audit-action {{ e.action }}">{{ e.action }}</span>
+        </td>
+        <td style="font-size:0.82rem; color:#4a5568; max-width:300px; word-break:break-all;">
+          {{ e.details[:80] }}{% if e.details|length > 80 %}…{% endif %}
+        </td>
+        <td style="font-size:0.8rem; color:#a0aec0;">{{ e.ip_address or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">📋</div>
+    <p>No audit events yet.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

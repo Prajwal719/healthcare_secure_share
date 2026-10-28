@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width:500px; margin:2rem auto;">
+  <div class="card">
+    <h2>⬇ Download &amp; Decrypt File</h2>
+
+    <div class="alert alert-success">
+      ✅ Your Key Password was saved at login — decryption happens automatically.
+    </div>
+
+    <p style="font-size:0.88rem; color:#718096; margin-bottom:1.5rem;">
+      File ID: <span class="file-id">{{ file_id }}</span>
+    </p>
+
+    <form method="POST">
+      <div style="display:flex; gap:0.8rem;">
+        <button type="submit" class="btn btn-info">🔓 Decrypt &amp; Download</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="background:#f7fafc;">
+    <h2 style="font-size:1rem;">🔐 What happens when you download</h2>
+    <ol style="padding-left:1.2rem; line-height:2.2; font-size:0.9rem; color:#4a5568;">
+      <li>Server checks your <strong>access permission</strong> (wrapped key exists)</li>
+      <li>Your <strong>RSA-3072 private key</strong> unwraps the AES key</li>
+      <li><strong>RSA-PSS signature</strong> verified against uploader's public key</li>
+      <li><strong>AES-256-GCM</strong> decrypts and authenticates the file</li>
+      <li>Plaintext file delivered to your browser</li>
+    </ol>
+  </div>
+</div>
+
+{% endblock %}

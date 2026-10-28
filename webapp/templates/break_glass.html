@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width:620px; margin:2rem auto;">
+  <div class="card" style="border-top: 5px solid #e53e3e;">
+    <h2 style="color: #c53030;">🚨 Emergency Break-Glass Access</h2>
+
+    <div class="alert alert-danger" style="margin-bottom: 1.5rem;">
+      <strong>⚠️ Warning:</strong> Break-Glass access bypasses standard sharing ACLs under emergency clinical protocols (HIPAA § 164.512(j)). This action triggers high-priority cryptographic security alerts and permanent hash-chained audit logging.
+    </div>
+
+    <p style="font-size:0.88rem; color:#718096; margin-bottom:1.2rem;">
+      Target File ID: <span class="file-id" style="font-weight: 600; color:#2d3748;">{{ file_id }}</span>
+    </p>
+
+    <form method="POST">
+      <div class="form-group">
+        <label style="font-weight: 600;">Clinical Emergency Justification <span style="color:#e53e3e;">*</span></label>
+        <textarea name="reason" rows="3" class="form-control"
+                  style="width:100%; padding:0.6rem; border:1px solid #cbd5e0; border-radius:6px; font-family:inherit;"
+                  placeholder="e.g. Acute emergency admission, patient unconscious, immediate drug allergy check required." required autofocus></textarea>
+        <small style="color:#718096; font-size:0.8rem;">
+          Must include clinical rationale for auditing and compliance review.
+        </small>
+      </div>
+
+      <div class="form-group" style="margin-top: 1rem;">
+        <label style="font-weight: 600;">Your Application Key Password</label>
+        <input type="password" name="key_password" class="form-control"
+               style="width:100%; padding:0.6rem; border:1px solid #cbd5e0; border-radius:6px;"
+               placeholder="Leave blank if saved in session" />
+        <small style="color:#718096; font-size:0.8rem;">
+          Needed to decrypt the re-wrapped key with your private key.
+        </small>
+      </div>
+
+      <div style="margin: 1.2rem 0; padding: 0.8rem; background: #fff5f5; border-radius: 6px; font-size: 0.85rem;">
+        <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer; color: #9b2c2c;">
+          <input type="checkbox" required style="margin-top: 0.2rem;" />
+          <span>I certify under professional medical responsibility that this emergency access is required for immediate patient life-safety.</span>
+        </label>
+      </div>
+
+      <div style="display:flex; gap:0.8rem; margin-top:1.5rem;">
+        <button type="submit" class="btn btn-danger" style="background:#e53e3e;">
+          🚨 Decrypt & Access Record
+        </button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="background:#f7fafc; border-left: 4px solid #3182ce;">
+    <h2 style="font-size:1.05rem; color:#2b6cb0;">🔐 How Institutional Key Escrow Works</h2>
+    <ul style="padding-left:1.2rem; line-height:2.0; font-size:0.88rem; color:#4a5568;">
+      <li>During file upload, the AES-256 data key is wrapped for the uploader <strong>and the institutional Escrow key</strong>.</li>
+      <li>On Break-Glass, the server verifies the emergency justification and logs an <code>ACTION_BREAK_GLASS</code> event.</li>
+      <li>The escrow service unwraps the file AES key using the Escrow Private Key and <strong>re-wraps it under your public key</strong>.</li>
+      <li>Your client decrypts the record directly with your private key without needing the original doctor's passphrase.</li>
+    </ul>
+  </div>
+</div>
+
+{% endblock %}

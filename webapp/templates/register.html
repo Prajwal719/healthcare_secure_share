@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="max-width:460px; margin:3rem auto;">
+  <div class="card">
+    <h2>📝 Create New Account</h2>
+
+    <div class="alert alert-info">
+      ℹ️ Your <strong>RSA encryption keys</strong> are generated automatically
+      when you register. You just need to choose a <strong>Key Password</strong>
+      to protect them — remember it, you'll need it every time you log in.
+    </div>
+
+    <form method="POST">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Choose a username" required autofocus/>
+      </div>
+
+      <div class="form-group">
+        <label>Login Password</label>
+        <input type="password" name="password" placeholder="Password to log in to the system" required/>
+      </div>
+
+      <div class="form-group">
+        <label>🔑 Key Password <span style="color:#e53e3e;">*</span></label>
+        <input type="password" name="key_password"
+               placeholder="Password to protect your RSA encryption keys" required/>
+        <small style="color:#718096; font-size:0.82rem; display:block; margin-top:0.3rem;">
+          ⚠️ This protects your private RSA key on disk.
+          You will enter this every time you log in.
+          <strong>If you forget it, you cannot decrypt your files.</strong>
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Role</label>
+        <select name="role" required>
+          <option value="">-- Select Role --</option>
+          <option value="doctor">🩺 Doctor — upload, download, share files</option>
+          <option value="nurse">💉 Nurse — download files only</option>
+          <option value="patient">🧑 Patient — view own files only</option>
+          <option value="admin">🔧 Admin — manage users, view audit log</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-success" style="width:100%; margin-top:0.5rem;">
+        ✅ Register &amp; Generate Keys
+      </button>
+    </form>
+
+    <p style="margin-top:1rem; text-align:center; font-size:0.88rem; color:#718096;">
+      Already registered? <a href="{{ url_for('login') }}" style="color:#3182ce;">Login here</a>
+    </p>
+  </div>
+
+  <div class="card" style="background:#fffaf0; border-left:4px solid #f6ad55;">
+    <h2 style="font-size:1rem; color:#7b341e;">⚠️ Two Passwords Explained</h2>
+    <table style="font-size:0.88rem;">
+      <tr>
+        <td style="padding:0.4rem 0.8rem 0.4rem 0; font-weight:600; color:#4a5568;">Login Password</td>
+        <td style="color:#4a5568;">Used to log in to the web app. Stored securely (scrypt hash) on the server.</td>
+      </tr>
+      <tr>
+        <td style="padding:0.4rem 0.8rem 0.4rem 0; font-weight:600; color:#4a5568;">Key Password</td>
+        <td style="color:#4a5568;">Encrypts your RSA private key file on disk. Never sent to the server. Required for file operations.</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

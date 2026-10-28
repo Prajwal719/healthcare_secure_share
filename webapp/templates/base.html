@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Healthcare Secure Share</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #2d3748;
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    nav {
+      background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    nav .brand {
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    nav .brand span { font-size: 1.4rem; }
+    nav .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+    nav .nav-links a {
+      color: #bee3f8;
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    nav .nav-links a:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    nav .nav-links .badge {
+      background: #48bb78;
+      color: #fff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.3rem;
+    }
+    nav .nav-links .badge.nurse  { background: #ed8936; }
+    nav .nav-links .badge.patient{ background: #9f7aea; }
+    nav .nav-links .badge.admin  { background: #e53e3e; }
+
+    /* ── Main container ── */
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .card h2 {
+      font-size: 1.3rem;
+      color: #1a365d;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 2px solid #ebf8ff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ── Alerts ── */
+    .alert {
+      padding: 0.9rem 1.2rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .alert-success { background: #f0fff4; border-left: 4px solid #48bb78; color: #276749; }
+    .alert-danger  { background: #fff5f5; border-left: 4px solid #fc8181; color: #9b2c2c; }
+    .alert-warning { background: #fffaf0; border-left: 4px solid #f6ad55; color: #7b341e; }
+    .alert-info    { background: #ebf8ff; border-left: 4px solid #63b3ed; color: #2c5282; }
+
+    /* ── Forms ── */
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 0.4rem;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #f7fafc;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #4299e1;
+      box-shadow: 0 0 0 3px rgba(66,153,225,0.15);
+      background: #fff;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.4rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary  { background: #3182ce; color: #fff; }
+    .btn-success  { background: #38a169; color: #fff; }
+    .btn-danger   { background: #e53e3e; color: #fff; }
+    .btn-warning  { background: #dd6b20; color: #fff; }
+    .btn-info     { background: #319795; color: #fff; }
+    .btn-secondary{ background: #718096; color: #fff; }
+    .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.82rem; }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th {
+      background: #ebf8ff;
+      color: #2c5282;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f7fafc; }
+
+    /* ── File ID pill ── */
+    .file-id {
+      font-family: monospace;
+      font-size: 0.78rem;
+      background: #edf2f7;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      color: #4a5568;
+    }
+
+    /* ── Role badge ── */
+    .role-badge {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .role-doctor  { background: #bee3f8; color: #2c5282; }
+    .role-nurse   { background: #feebc8; color: #7b341e; }
+    .role-patient { background: #e9d8fd; color: #553c9a; }
+    .role-admin   { background: #fed7d7; color: #9b2c2c; }
+
+    /* ── Stats row ── */
+    .stats { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .stat-card {
+      flex: 1;
+      min-width: 140px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.2rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      text-align: center;
+    }
+    .stat-card .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #2b6cb0;
+    }
+    .stat-card .stat-label {
+      font-size: 0.8rem;
+      color: #718096;
+      margin-top: 0.2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Empty state ── */
+    .empty {
+      text-align: center;
+      padding: 3rem;
+      color: #a0aec0;
+    }
+    .empty .empty-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+
+    /* ── Inline form ── */
+    .inline-form { display: flex; gap: 0.5rem; align-items: center; }
+    .inline-form input { flex: 1; }
+
+    /* ── Security indicator ── */
+    .security-bar {
+      background: linear-gradient(90deg, #1a365d, #2b6cb0);
+      color: #bee3f8;
+      font-size: 0.75rem;
+      text-align: center;
+      padding: 0.3rem;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Audit log ── */
+    .audit-action {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: #ebf8ff;
+      color: #2c5282;
+    }
+    .audit-action.upload   { background: #f0fff4; color: #276749; }
+    .audit-action.download { background: #ebf8ff; color: #2c5282; }
+    .audit-action.login_ok { background: #f0fff4; color: #276749; }
+    .audit-action.login_failed { background: #fff5f5; color: #9b2c2c; }
+    .audit-action.share_file   { background: #faf5ff; color: #553c9a; }
+    .audit-action.revoke_access{ background: #fffaf0; color: #7b341e; }
+    .audit-action.break_glass  { background: #fff5f5; color: #9b2c2c; font-weight: 800; }
+
+    /* ── Valid/Invalid chain ── */
+    .chain-valid   { color: #276749; font-size: 1.5rem; font-weight: 800; }
+    .chain-invalid { color: #9b2c2c; font-size: 1.5rem; font-weight: 800; }
+  </style>
+</head>
+<body>
+
+<div class="security-bar">
+  🔒 AES-256-GCM · RSA-3072-OAEP · RSA-PSS · Mutual TLS 1.3 · Replay Protection
+</div>
+
+<nav>
+  <a class="brand" href="{{ url_for('dashboard') if session.get('token') else url_for('login') }}">
+    <span>🏥</span> Healthcare Secure Share
+  </a>
+  <div class="nav-links">
+    {% if session.get('token') %}
+      <a href="{{ url_for('dashboard') }}">📁 Files</a>
+      {% if session.get('role') == 'doctor' %}
+        <a href="{{ url_for('upload') }}">⬆ Upload</a>
+      {% endif %}
+      <a href="{{ url_for('observatory') }}">🛡️ Security Lab</a>
+      {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('audit') }}">📋 Audit Log</a>
+        <a href="{{ url_for('list_users') }}">👥 Users</a>
+      {% endif %}
+      <span>
+        {{ session.get('username') }}
+        <span class="badge {{ session.get('role') }}">{{ session.get('role') }}</span>
+      </span>
+      <a href="{{ url_for('logout') }}">🚪 Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('register') }}">Register</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">
+        {% if category == 'success' %}✅{% elif category == 'danger' %}❌{% elif category == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</div>
+
+{% if session.get('token') %}
+<script>
+(function() {
+  var warningShown = false;
+  setInterval(function() {
+    fetch('/api/session_status')
+      .then(function(r){ return r.json(); })
+      .then(function(d) {
+        if (!d.valid) {
+          window.location.href = '/logout';
+        } else if (d.remaining < 120 && !warningShown) {
+          warningShown = true;
+          var bar = document.createElement('div');
+          bar.className = 'alert alert-warning';
+          bar.style.cssText = 'position:fixed;top:70px;right:1rem;z-index:9999;max-width:340px;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+          bar.innerHTML = '⚠️ Your session expires in <strong>' + d.remaining + 's</strong>. <a href="/logout" style="color:#7b341e;font-weight:700;">Re-login</a> to continue.';
+          document.body.appendChild(bar);
+        }
+      }).catch(function(){});
+  }, 30000);
+})();
+</script>
+{% endif %}
+</body>
+</html>

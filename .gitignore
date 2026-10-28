@@ -1,0 +1,26 @@
+# Python caches and test output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local environment files
+.venv/
+venv/
+env/
+.env
+
+# Generated TLS certificates and private keys
+certs/*.key
+certs/*.crt
+keys/*.pem
+
+# Local application state
+server/*.db
+*.sqlite
+*.sqlite3
+
+# Local logs and temporary files
+*.log
+*.tmp

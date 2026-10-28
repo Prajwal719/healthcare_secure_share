@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Stats row -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-num">{{ files|length }}</div>
+    <div class="stat-label">Accessible Files</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#38a169;">🔒</div>
+    <div class="stat-label">AES-256-GCM</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#805ad5;">🔑</div>
+    <div class="stat-label">RSA-3072 Keys</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num" style="color:#dd6b20;">✍</div>
+    <div class="stat-label">RSA-PSS Signed</div>
+  </div>
+</div>
+
+<!-- Files table -->
+<div class="card">
+  <h2>
+    📁 My Files
+    {% if role == 'doctor' %}
+      <a href="{{ url_for('upload') }}" class="btn btn-success btn-sm" style="margin-left:auto;">
+        ⬆ Upload New File
+      </a>
+    {% endif %}
+  </h2>
+
+  {% if files %}
+  <table>
+    <thead>
+      <tr>
+        <th>Filename</th>
+        <th>Size</th>
+        <th>Uploaded By</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in files %}
+      <tr>
+        <td>
+          📄 <strong>{{ f.filename }}</strong>
+          <br><span class="file-id">{{ f.file_id[:18] }}…</span>
+        </td>
+        <td style="font-size:0.85rem; color:#718096;">{{ f.size_fmt }}</td>
+        <td>
+          <span class="role-badge role-doctor" style="font-size:0.78rem;">
+            {{ f.uploader_name }}
+          </span>
+        </td>
+        <td style="font-size:0.85rem;">{{ f.uploaded_at_fmt }}</td>
+        <td>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap; align-items:center;">
+
+            <!-- Download -->
+            <form method="POST" action="{{ url_for('download', file_id=f.file_id) }}" style="margin:0;">
+              <button type="submit" class="btn btn-info btn-sm">⬇ Download</button>
+            </form>
+
+            <!-- Share (doctor only) -->
+            {% if role == 'doctor' %}
+            <a href="{{ url_for('share', file_id=f.file_id) }}"
+               class="btn btn-warning btn-sm">🔗 Share</a>
+
+            <!-- Revoke — opens inline form on click -->
+            <button type="button" class="btn btn-danger btn-sm"
+                    onclick="toggleRevoke('{{ f.file_id }}')">🚫 Revoke</button>
+            {% endif %}
+
+          </div>
+
+          {% if role == 'doctor' %}
+          <!-- Inline revoke form, hidden by default -->
+          <div id="revoke-{{ f.file_id }}" style="display:none; margin-top:0.5rem;">
+            <form method="POST" action="{{ url_for('revoke', file_id=f.file_id) }}"
+                  style="display:flex; gap:0.4rem; align-items:center;"
+                  onsubmit="return confirm('Revoke access for this user?')">
+              <input type="text" name="target" placeholder="username to revoke"
+                     style="width:150px; padding:0.3rem 0.5rem; border:1.5px solid #fc8181;
+                            border-radius:6px; font-size:0.82rem;" required/>
+              <button type="submit" class="btn btn-danger btn-sm">Confirm Revoke</button>
+              <button type="button" class="btn btn-secondary btn-sm"
+                      onclick="toggleRevoke('{{ f.file_id }}')">Cancel</button>
+            </form>
+          </div>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">📭</div>
+    <p>No files yet.</p>
+    {% if role == 'doctor' %}
+    <a href="{{ url_for('upload') }}" class="btn btn-success" style="margin-top:1rem;">
+      ⬆ Upload your first file
+    </a>
+    {% else %}
+    <p style="margin-top:0.5rem; font-size:0.88rem;">
+      Ask a doctor to share a file with you.
+    </p>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+{% if role in ('doctor', 'admin') %}
+<div class="card" style="border-top: 3px solid #e53e3e;">
+  <h2 style="color: #c53030; font-size: 1.15rem;">
+    🚨 Emergency Break-Glass Record Access (HIPAA § 164.512(j))
+  </h2>
+  <p style="font-size: 0.88rem; color: #4a5568; margin-bottom: 1rem;">
+    Need immediate access to an unshared patient record during a life-threatening emergency?
+    Enter the File UUID below to initiate Key Escrow recovery.
+  </p>
+  <form onsubmit="event.preventDefault(); var fid = document.getElementById('bg-file-id').value.trim(); if(fid) window.location.href='/break_glass/' + fid;" style="display:flex; gap:0.6rem; max-width:550px;">
+    <input type="text" id="bg-file-id" placeholder="Enter Target File UUID" required
+           style="flex:1; padding:0.5rem 0.8rem; border:1px solid #e2e8f0; border-radius:6px; font-size:0.9rem;" />
+    <button type="submit" class="btn btn-danger" style="background:#e53e3e;">
+      🚨 Break Glass
+    </button>
+  </form>
+</div>
+{% endif %}
+
+<!-- Role permissions info -->
+<div class="card" style="background:#f7fafc;">
+  <h2 style="font-size:1rem;">🛡 Your Permissions
+    <span class="role-badge role-{{ role }}" style="margin-left:0.5rem;">{{ role }}</span>
+  </h2>
+  <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:0.5rem;">
+    {% set perms = {
+      'doctor':  ['Upload', 'Download', 'Share', 'Revoke', 'Break-Glass'],
+      'nurse':   ['Download', 'List'],
+      'patient': ['Download own files', 'List'],
+      'admin':   ['Download', 'List', 'Audit Log', 'Manage Users']
+    } %}
+    {% for p in perms[role] %}
+    <span style="background:#ebf8ff; color:#2c5282; padding:0.3rem 0.8rem;
+                 border-radius:20px; font-size:0.82rem; font-weight:600;">
+      ✔ {{ p }}
+    </span>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+function toggleRevoke(fileId) {
+  var el = document.getElementById('revoke-' + fileId);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="margin-bottom: 2rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 1.8rem; color: #1a365d; display: flex; align-items: center; gap: 0.6rem;">
+        🛡️ Security Observatory & Attack Lab
+      </h1>
+      <p style="color: #4a5568; margin-top: 0.3rem;">
+        Real-time interactive cryptanalysis & attack simulation suite. Verify that each protocol defense actively repels adversarial attempts.
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.8rem;">
+      <button id="btn-run-all" onclick="runAllAttacks()" class="btn btn-primary" style="font-size: 1rem; padding: 0.6rem 1.4rem; background: #2b6cb0;">
+        ⚡ Run All 9 Attack Simulations
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary metrics -->
+  <div class="stats" style="margin-top: 1.5rem;">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-total">9</div>
+      <div class="stat-label">Total Threat Vectors</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-passed" style="color: #38a169;">0 / 9</div>
+      <div class="stat-label">Attacks Blocked (PASS)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color: #3182ce;">100%</div>
+      <div class="stat-label">Mutual TLS & AEAD</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color: #805ad5;">Zero</div>
+      <div class="stat-label">Plaintext Leaks</div>
+    </div>
+  </div>
+</div>
+
+<!-- Attacks Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
+  {% for id, a in attacks.items() %}
+  <div class="card" id="card-attack-{{ id }}" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border-left: 5px solid #cbd5e0; transition: border-color 0.3s, box-shadow 0.3s;">
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.6rem;">
+        <span style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: #718096; letter-spacing: 0.5px;">
+          Attack {{ id }} &bull; {{ a.category }}
+        </span>
+        <span id="badge-{{ id }}" class="badge" style="background: #e2e8f0; color: #4a5568; font-size: 0.75rem;">
+          READY
+        </span>
+      </div>
+
+      <h3 style="font-size: 1.15rem; color: #2d3748; margin-bottom: 0.6rem;">
+        {{ a.title }}
+      </h3>
+
+      <p style="font-size: 0.88rem; color: #4a5568; margin-bottom: 1rem; line-height: 1.5;">
+        {{ a.description }}
+      </p>
+
+      <div style="background: #f7fafc; padding: 0.7rem; border-radius: 6px; font-size: 0.82rem; margin-bottom: 1rem;">
+        <div><strong>Security Goal:</strong> <span style="color: #2b6cb0;">{{ a.property }}</span></div>
+        <div style="margin-top: 0.3rem;"><strong>Defending Layer:</strong> <span style="color: #276749;">{{ a.mechanism }}</span></div>
+      </div>
+
+      <div id="result-box-{{ id }}" style="display: none; padding: 0.7rem; border-radius: 6px; font-size: 0.82rem; margin-bottom: 1rem;">
+      </div>
+    </div>
+
+    <div style="margin-top: 1rem; pt: 0.8rem; border-top: 1px solid #edf2f7; display: flex; justify-content: flex-end;">
+      <button id="btn-attack-{{ id }}" onclick="runSingleAttack({{ id }})" class="btn btn-secondary btn-sm" style="background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0;">
+        ⚡ Simulate Attack {{ id }}
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+function renderResult(id, res) {
+  var card = document.getElementById('card-attack-' + id);
+  var badge = document.getElementById('badge-' + id);
+  var box = document.getElementById('result-box-' + id);
+  var btn = document.getElementById('btn-attack-' + id);
+
+  btn.disabled = false;
+  btn.innerText = '⚡ Re-test Attack ' + id;
+  box.style.display = 'block';
+
+  if (res.status === 'PASS' && res.blocked) {
+    card.style.borderLeftColor = '#38a169';
+    badge.className = 'badge';
+    badge.style.background = '#38a169';
+    badge.style.color = '#fff';
+    badge.innerText = 'DEFENSE HELD';
+    box.style.background = '#f0fff4';
+    box.style.color = '#22543d';
+    box.style.border = '1px solid #c6f6d5';
+    box.innerHTML = '<strong>🛡️ Attack Defeated:</strong> ' + res.detail;
+  } else {
+    card.style.borderLeftColor = '#e53e3e';
+    badge.className = 'badge';
+    badge.style.background = '#e53e3e';
+    badge.style.color = '#fff';
+    badge.innerText = 'ATTACK BREACH';
+    box.style.background = '#fff5f5';
+    box.style.color = '#742a2a';
+    box.style.border = '1px solid #fed7d7';
+    box.innerHTML = '<strong>❌ Security Failure:</strong> ' + res.detail;
+  }
+}
+
+function runSingleAttack(id) {
+  var btn = document.getElementById('btn-attack-' + id);
+  var badge = document.getElementById('badge-' + id);
+  btn.disabled = true;
+  btn.innerText = 'Running…';
+  badge.innerText = 'TESTING';
+  badge.style.background = '#ecc94b';
+  badge.style.color = '#744210';
+
+  fetch('/api/run_attack/' + id, { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      renderResult(id, res);
+      updateTotalCounter();
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.innerText = 'Test Attack ' + id;
+      alert('Error running attack ' + id + ': ' + err);
+    });
+}
+
+function runAllAttacks() {
+  var btn = document.getElementById('btn-run-all');
+  btn.disabled = true;
+  btn.innerText = 'Simulating All 9 Attacks…';
+
+  for (var i = 1; i <= 9; i++) {
+    var b = document.getElementById('badge-' + i);
+    if (b) {
+      b.innerText = 'PENDING';
+      b.style.background = '#ecc94b';
+      b.style.color = '#744210';
+    }
+  }
+
+  fetch('/api/run_all_attacks', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      btn.disabled = false;
+      btn.innerText = '⚡ Run All 9 Attack Simulations';
+      var passed = 0;
+      data.results.forEach(function(res) {
+        renderResult(res.id, res);
+        if (res.status === 'PASS') passed++;
+      });
+      document.getElementById('stat-passed').innerText = passed + ' / ' + data.total;
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.innerText = '⚡ Run All 9 Attack Simulations';
+      alert('Error executing attack suite: ' + err);
+    });
+}
+
+function updateTotalCounter() {
+  var count = 0;
+  for (var i = 1; i <= 9; i++) {
+    var b = document.getElementById('badge-' + i);
+    if (b && b.innerText === 'DEFENSE HELD') count++;
+  }
+  document.getElementById('stat-passed').innerText = count + ' / 9';
+}
+</script>
+
+{% endblock %}

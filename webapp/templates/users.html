@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+  <h2>👥 Registered Users</h2>
+
+  {% if users %}
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Role</th>
+        <th>User ID</th>
+        <th>Registered</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td><strong>{{ u.username }}</strong></td>
+        <td><span class="role-badge role-{{ u.role }}">{{ u.role }}</span></td>
+        <td><span class="file-id">{{ u.user_id[:18] }}…</span></td>
+        <td style="font-size:0.85rem; color:#718096;">{{ u.created_fmt }}</td>
+        <td>
+          {% if u.username != session.get('username') %}
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+
+            <!-- Unlock account -->
+            <form method="POST" action="{{ url_for('unlock_user') }}" style="margin:0;">
+              <input type="hidden" name="username" value="{{ u.username }}"/>
+              <button type="submit" class="btn btn-warning btn-sm"
+                      title="Reset failed login counter and unlock account">
+                🔓 Unlock
+              </button>
+            </form>
+
+            <!-- Delete user -->
+            <form method="POST" action="{{ url_for('delete_user') }}" style="margin:0;"
+                  onsubmit="return confirm('Permanently delete user {{ u.username }}? This cannot be undone.')">
+              <input type="hidden" name="username" value="{{ u.username }}"/>
+              <button type="submit" class="btn btn-danger btn-sm">🗑 Delete</button>
+            </form>
+
+          </div>
+          {% else %}
+          <span style="font-size:0.8rem; color:#a0aec0;">— (you)</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">👥</div>
+    <p>No users registered yet.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
